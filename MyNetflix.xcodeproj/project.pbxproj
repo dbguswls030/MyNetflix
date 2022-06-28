@@ -20,6 +20,8 @@
 		9FA1CEB9286AD9A600F94C48 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA1CEB8286AD9A600F94C48 /* HomeViewController.swift */; };
 		9FA1CEBB286AD9AF00F94C48 /* SearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA1CEBA286AD9AF00F94C48 /* SearchViewController.swift */; };
 		9FA1CEBF286ADA7100F94C48 /* TabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA1CEBE286ADA7100F94C48 /* TabBarViewController.swift */; };
+		9FA1CEC1286AE75500F94C48 /* MovieCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA1CEC0286AE75500F94C48 /* MovieCollectionViewCell.swift */; };
+		9FA1CEC3286AE87600F94C48 /* MovieCollectionReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA1CEC2286AE87500F94C48 /* MovieCollectionReusableView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +59,8 @@
 		9FA1CEB8286AD9A600F94C48 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 		9FA1CEBA286AD9AF00F94C48 /* SearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewController.swift; sourceTree = "<group>"; };
 		9FA1CEBE286ADA7100F94C48 /* TabBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarViewController.swift; sourceTree = "<group>"; };
+		9FA1CEC0286AE75500F94C48 /* MovieCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieCollectionViewCell.swift; sourceTree = "<group>"; };
+		9FA1CEC2286AE87500F94C48 /* MovieCollectionReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieCollectionReusableView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,6 +146,8 @@
 			children = (
 				9FA1CEB4286AD8E900F94C48 /* Home.storyboard */,
 				9FA1CEB8286AD9A600F94C48 /* HomeViewController.swift */,
+				9FA1CEC2286AE87500F94C48 /* MovieCollectionReusableView.swift */,
+				9FA1CEC0286AE75500F94C48 /* MovieCollectionViewCell.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -288,9 +294,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9FA1CEC3286AE87600F94C48 /* MovieCollectionReusableView.swift in Sources */,
 				9FA1CEBB286AD9AF00F94C48 /* SearchViewController.swift in Sources */,
 				9F9AA6BA286AD25A00D195B7 /* AppDelegate.swift in Sources */,
 				9F9AA6BC286AD25A00D195B7 /* SceneDelegate.swift in Sources */,
+				9FA1CEC1286AE75500F94C48 /* MovieCollectionViewCell.swift in Sources */,
 				9FA1CEBF286ADA7100F94C48 /* TabBarViewController.swift in Sources */,
 				9FA1CEB9286AD9A600F94C48 /* HomeViewController.swift in Sources */,
 			);
