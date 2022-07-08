@@ -6,11 +6,10 @@
 //
 
 import UIKit
-
+import AVFoundation
 class SearchViewController: UIViewController {
     
     @IBOutlet weak var collectionView: UICollectionView!
-    
     @IBOutlet weak var searchBar: UISearchBar!
     
     let movieListViewModel = MovieViewModel()
@@ -49,23 +48,27 @@ extension SearchViewController: UISearchBarDelegate{
             DispatchQueue.main.async {
                 self.movieListViewModel.loadMovie(movies: movies)
                 self.collectionView.reloadData()
-                
             }
         }
-        
-        
+    }
+}
+extension SearchViewController: UICollectionViewDelegate{
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let movie = movieListViewModel.getMovie(index: indexPath.item)
+        let item = AVPlayerItem(url: URL(string: movie.preViewURL)!)
+        let vc = UIStoryboard(name: "Player", bundle: nil).instantiateViewController(identifier: "Player") as! PlayerViewController
+        vc.modalPresentationStyle = .fullScreen
+        vc.playerItem = item
+        self.present(vc, animated: false)
         
     }
 }
-
 
 extension SearchViewController: UICollectionViewDataSource{
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "movieCell", for: indexPath) as? SearchCollectionViewCell else{
             return UICollectionViewCell()
         }
-        
-//        cell.updateUI(movie: movieListViewModel.getMovie(index: indexPath.item))
         cell.updateUI(url: URL(string: movieListViewModel.getMovie(index: indexPath.item).thumbnailPath)!)
         return cell
         

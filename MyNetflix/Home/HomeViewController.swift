@@ -8,6 +8,7 @@
 import UIKit
 
 class HomeViewController: UIViewController {
+    // 장르별 collectionView
     
     @IBOutlet weak var collectionView: UICollectionView!
     override func viewDidLoad() {
