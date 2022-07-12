@@ -12,11 +12,13 @@ struct Movie: Codable{
     let director: String
     let thumbnailPath: String
     let preViewURL: String
+    let genre: String
     
     enum CodingKeys: String, CodingKey{
         case title = "trackName"
         case director = "artistName"
         case thumbnailPath = "artworkUrl100"
         case preViewURL = "previewUrl"
+        case genre = "primaryGenreName"
     }
 }

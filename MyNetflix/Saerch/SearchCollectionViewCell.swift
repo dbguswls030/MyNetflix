@@ -16,6 +16,7 @@ class SearchCollectionViewCell: UICollectionViewCell {
             let data = try? Data(contentsOf: url)
             DispatchQueue.main.async {
                 self?.thumbnailImage.image = UIImage(data: data!)
+                self?.thumbnailImage.layer.cornerRadius = 3
             }
         }
     }

@@ -49,6 +49,7 @@ class PlayerViewController: UIViewController {
         }
         timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(autoHideControlView), userInfo: nil, repeats: true)
     }
+    
     @objc func autoHideControlView(){
 //        print(timerNum)
         if timerNum == 3{

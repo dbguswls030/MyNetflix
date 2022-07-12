@@ -44,7 +44,7 @@ extension SearchViewController: UISearchBarDelegate{
             return
         }
         SearchAPI.search(term: searchTerm) { movies in
-            print("몇 개 넘어 왔나 --> \(movies.count) 개")
+//            print("몇 개 넘어 왔나 --> \(movies.count) 개")
             DispatchQueue.main.async {
                 self.movieListViewModel.loadMovie(movies: movies)
                 self.collectionView.reloadData()

@@ -6,75 +6,116 @@
 //
 
 import UIKit
+import AVFoundation
 
 class HomeViewController: UIViewController {
     // 장르별 collectionView
+    var movie: Movie?
+    @IBOutlet weak var headerThumbnail: UIImageView!
+    @IBOutlet weak var playButton: UIButton!
     
-    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var tableView: UITableView!
+    
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // Do any additional setup after loading the view.
-        self.collectionView.dataSource = self
+        initThumbnail()
+        tableView.dataSource = self
+        tableView.delegate = self
+        initTableView()
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    @IBAction func playButton(_ sender: Any) {
+        guard let movie = movie else {
+            return
+        }
+        let item = AVPlayerItem(url: URL(string: movie.preViewURL)!)
+        let vc = UIStoryboard(name: "Player", bundle: nil).instantiateViewController(identifier: "Player") as! PlayerViewController
+        vc.modalPresentationStyle = .fullScreen
+        vc.playerItem = item
+        self.present(vc, animated: false)
     }
-    */
-
+    
+    func initThumbnail(){
+        SearchAPI.recommendOneItem { movies in
+            self.movie = movies.first!
+            let url = URL(string: self.movie!.thumbnailPath)!
+            self.updateUI(url: url)
+        }
+    }
+    func updateUI(url: URL){
+        DispatchQueue.global().async { [weak self] in
+            let data = try? Data(contentsOf: url)
+            DispatchQueue.main.async {
+                self?.playButton.layer.cornerRadius = 2
+                self?.headerThumbnail.image = UIImage(data: data!)
+            }
+        }
+    }
+    
 }
-extension HomeViewController: UICollectionViewDataSource{
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 20
+
+extension HomeViewController: UITableViewDataSource, UITableViewDelegate{
+    func initTableView(){
+        let tableNib = UINib(nibName: "MovieGenreTableViewCell", bundle: nil)
+        self.tableView.register(tableNib, forCellReuseIdentifier: "MovieGenreList")
     }
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "list", for: indexPath) as? MovieCollectionViewCell else{
-            return UICollectionViewCell()
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return SearchAPI.movieGenre.count
+    }
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 200
+    }
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "MovieGenreList") as? MovieGenreTableViewCell else{
+            return UITableViewCell()
+        }
+        
+        cell.getMovies(genre: SearchAPI.movieGenre[indexPath.row])
+        cell.updateUI(genre: SearchAPI.movieGenre[indexPath.row])
+        cell.presentDelegate = { vc in
+            self.present(vc, animated: false)
         }
         return cell
     }
-    
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        switch kind{
-        case UICollectionView.elementKindSectionHeader:
-            guard let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "header", for: indexPath) as? MovieCollectionReusableView else{
-                return UICollectionReusableView()
-            }
-            return header
-        default:
-            return UICollectionReusableView()
-        }
-    }
 }
-extension HomeViewController: UICollectionViewDelegateFlowLayout{
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        // MARK: 헤더 사이즈 조절
-        let width = collectionView.bounds.width
-//        let indexPath = IndexPath(row: 0, section: section)
-//        guard let header = self.collectionView(collectionView, viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader, at: indexPath) as? BoardCollectionReusableView else{
-//            return CGSize(width: width, height: 401.5)
+
+
+// MARK: Header에 추천 영상 띄우기
+
+// MARK: tableView에 CollectionView 넣기
+
+
+//extension HomeViewController: UICollectionViewDataSource{
+//    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+//        return SearchAPI.movieGenre.count
+//    }
+//    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+//        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MovieList", for: indexPath) as? MovieCollectionViewCell else{
+//            return UICollectionViewCell()
 //        }
-//        let profileImage = header.profileImage.bounds.height
+//        return cell
+//    }
 //
-//        let content = header.contents.bounds.height
-//        let commentLabel = header.commentCount.bounds.height
+//    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+//        switch kind{
+//        case UICollectionView.elementKindSectionHeader:
+//            guard let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HeaderMovie", for: indexPath) as? MovieCollectionReusableView else{
+//                return UICollectionReusableView()
+//            }
+//            header.getThumbnail()
+//            header.delegate = { vc in
+//                self.present(vc, animated: false)
+//            }
+//            return header
+//        default:
+//            return UICollectionReusableView()
+//        }
+//    }
+//}
 //
-//        let height = 15 + profileImage + 15 + 1 + 20 + content + 15 + 25 + 1 + 3 + commentLabel + 3 + 1
-//        return CGSize(width: width, height: height)
-        
-        return CGSize(width: width, height: 500)
-    }
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = collectionView.bounds.width
-        // MARK: 셀 사이즈 조절
-        return CGSize(width: width, height: 160)
-    }
-    
-}
