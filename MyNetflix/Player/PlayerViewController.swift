@@ -18,15 +18,18 @@ class PlayerViewController: UIViewController {
     var timeObserverToken: Any?
     var timerNum = 0
     var timer: Timer?
-    var player: AVPlayer?
-    var playerItem: AVPlayerItem?
+    let player = AVPlayer()
+//    var playerItem: AVPlayerItem?
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
         initPlayerUrl()
+        showControlView()
+        play()
         initTimeSlider()
+        
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         if controlView.alpha == 0{
@@ -34,13 +37,10 @@ class PlayerViewController: UIViewController {
         }else if controlView.alpha == 1{
             hideControlView()
         }
-        
     }
-    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        play()
-        showControlView()
+
     }
     func startTimer(){
         timerNum = 0
@@ -58,15 +58,17 @@ class PlayerViewController: UIViewController {
             timer = nil
         }
         timerNum += 1
-        
+
     }
     func initPlayerUrl(){
-        guard let playerItem = playerItem else {
+        guard let playerItem = player.currentItem else {
+            print("is not item")
             return
         }
-        player = AVPlayer(playerItem: playerItem)
+        print("success get player item : \(playerItem)")
         playerView.player = player
     }
+
     func hideControlView(){
         UIView.animate(withDuration: 0.4){
             self.controlView.alpha = 0
@@ -78,71 +80,84 @@ class PlayerViewController: UIViewController {
         }
         startTimer()
     }
+//
     func initTimeSlider(){
         timeSlider.tintColor = .red
-        DispatchQueue.global(qos: .background).async {
-            let duration : CMTime = self.playerItem!.asset.duration
-            let seconds : Float64 = CMTimeGetSeconds(duration)
-            DispatchQueue.main.async {
-                self.timeSlider.maximumValue = Float(seconds)
-            }
-        }
         timeSlider.isContinuous = true
         timeSlider.minimumValue = 0
+//        print("totalTime : \(Float(CMTimeGetSeconds(self.player.currentItem?.duration ?? CMTimeMake(value: 1, timescale: 1))))")
+        timeSlider.value = .zero
         updateTime(time: .zero)
-        remainingTimeLabel.text = convertTimeToString(time: .zero)
         timeSlider.addTarget(self, action: #selector(playbackSliderChagnedValue), for: .valueChanged)
-        timeSlider.addTarget(self, action: #selector(playbackSliderEndedTracking),for: [.touchUpInside,.touchUpOutside])
     }
-    @objc func playbackSliderEndedTracking(timeSlider: UISlider, event: UIEvent){
-        startTimer()
-    }
+    
+
     @objc func playbackSliderChagnedValue(timeSlider: UISlider, event: UIEvent){
-        timer?.invalidate()
-        DispatchQueue.main.async {
-            let seconds = Int64(timeSlider.value * Float(CMTimeScale(NSEC_PER_SEC)))
-            let seekTime = CMTimeMake(value: seconds, timescale: CMTimeScale(NSEC_PER_SEC))
-            self.player?.seek(to: seekTime)
-        }
+        if let touchEvent = event.allTouches?.first {
+               switch touchEvent.phase {
+               case .began:
+                   // handle drag began
+                   pause()
+                   timer?.invalidate()
+                   
+               case .moved:
+                   // handle drag moved
+                   print("moved")
+                   //totaltime - slider.value
+                   let seconds : Int64 = Int64(timeSlider.value * Float(CMTimeScale(NSEC_PER_SEC)))
+                   let targetTime:CMTime = CMTimeMake(value: seconds, timescale: CMTimeScale(NSEC_PER_SEC))
+                   self.remainingTimeLabel.text = convertTimeToString(time: targetTime)
+               case .ended:
+                   // handle drag ended
+                   let seconds = Int64(timeSlider.value * Float(CMTimeScale(NSEC_PER_SEC)))
+                   let seekTime = CMTimeMake(value: seconds, timescale: CMTimeScale(NSEC_PER_SEC))
+                   self.player.seek(to: seekTime)
+                   if player.rate == 0{
+                       play()
+                   }
+                   startTimer()
+               default:
+                   break
+               }
+           }
     }
      
     func addPeriodicTimeObserver(){
-        guard let player = player else {
-            return
-        }
-        let timeScale = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        print("add time obeserver")
+        let timeScale = CMTime(seconds: 1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         timeObserverToken = player.addPeriodicTimeObserver(forInterval: timeScale, queue: .main) { [weak self] currentTime in
-//            print(currentTime)
-            guard let currentItem = self?.player!.currentItem else{
-                print("error")
-                return
-            }
-            guard currentItem.status == .readyToPlay else{
-                return
-            }
-            let totalPlayTime = Float(CMTimeGetSeconds(currentItem.asset.duration))
+            
+            let totalPlayTime = Float(CMTimeGetSeconds(self?.player.currentItem?.duration ?? CMTimeMake(value: 1, timescale: 1)))
+            
+            self?.timeSlider.maximumValue = totalPlayTime
+            self?.updateTime(time: currentTime)
+            
             let currentPlayTime = Float(CMTimeGetSeconds(currentTime))
             if currentPlayTime == totalPlayTime{
                 self?.reset()
                 self?.dismiss(animated: false)
             }
-            self?.updateTime(time: currentTime)
         }
     }
     func removeTimeObserver(){
         if let token = timeObserverToken{
-            player!.removeTimeObserver(token)
+            player.removeTimeObserver(token)
             timeObserverToken = nil
         }
     }
     func updateTime(time: CMTime){
-        //totalTime - currentTime
         self.remainingTimeLabel.text = convertTimeToString(time: time)
         timeSlider.value = Float(CMTimeGetSeconds(time))
     }
     func convertTimeToString(time: CMTime) -> String{
-        let totalTime = Float(CMTimeGetSeconds(self.playerItem!.asset.duration))
+        let totalTime = Float(CMTimeGetSeconds(self.player.currentItem?.duration ?? CMTimeMake(value: 1, timescale: 1)))
         let currentTime = Float(CMTimeGetSeconds(time))
+        print(currentTime, totalTime)
+        guard !totalTime.isInfinite, !totalTime.isNaN, !currentTime.isInfinite, !currentTime.isNaN else{
+            print("time is infinite or NaN")
+            return String(format: "%02d:%02d", 0, 0)
+        }
+        //totalTime - currentTime
         let remainingTime = Int(totalTime-currentTime)
         let min = remainingTime / 60
         let seconds = remainingTime % 60
@@ -159,28 +174,28 @@ class PlayerViewController: UIViewController {
     }
     
     @IBAction func togglePlayButton(_ sender: Any) {
-        if player!.isPlaying{
+        if player.isPlaying{
             pause()
         }else{
             play()
         }
     }
     func play(){
-        player!.play()
+        player.play()
         self.timerNum = 0
         addPeriodicTimeObserver()
         playButton.isSelected = true
     }
     func pause(){
-        player!.pause()
+        player.pause()
         self.timerNum = 0
         removeTimeObserver()
         playButton.isSelected = false
     }
     func reset(){
-        player!.pause()
+        player.pause()
         removeTimeObserver()
-        player!.replaceCurrentItem(with: nil)
+        player.replaceCurrentItem(with: nil)
     }
 }
 

@@ -36,7 +36,8 @@ class HomeViewController: UIViewController {
         let item = AVPlayerItem(url: URL(string: movie.preViewURL)!)
         let vc = UIStoryboard(name: "Player", bundle: nil).instantiateViewController(identifier: "Player") as! PlayerViewController
         vc.modalPresentationStyle = .fullScreen
-        vc.playerItem = item
+//        vc.playerItem = item
+        vc.player.replaceCurrentItem(with: item)
         self.present(vc, animated: false)
     }
     
